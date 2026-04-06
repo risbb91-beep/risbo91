@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lorem Website</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="logo">Lorem</div>
+        <ul>
+            <li><a href="#">Lorem 1</a></li>
+            <li><a href="#">Lorem 2</a></li>
+            <li><a href="#">Lorem 3</a></li>
+            <li><a href="#">Lorem 4</a></li>
+        </ul>
+    </nav>
+
+    <!-- TITLE BAR -->
+    <header class="title-bar">
+        <h1>Lorem ipsum dolor sit amet!</h1>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <section class="content">
+        <img src="left.jpg" alt="Left image">
+
+        <div class="text">
+            <h2>Lorem</h2>
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Quo impedit accusamus suscipit ad vitae laborum enim aperiam tenetur.
+                Blanditiis dolorum dicta accusantium.
+                Id cum corporis quidem nulla cupiditate. Sint, amet!
+            </p>
+        </div>
+
+        <img src="right.jpg" alt="Right image">
+    </section>
+
+    <!-- TABLE + FORM -->
+    <section class="bottom">
+        <!-- TABLE -->
+        <table>
+            <tr>
+                <th>Lorem</th>
+                <th>Ipsum</th>
+                <th>Sit</th>
+                <th>Dolor</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td rowspan="2" class="orange">rowspan</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="dark">colspan</td>
+                <td>4</td>
+            </tr>
+        </table>
+
+        <!-- FORM -->
+        <form class="form">
+            <label>First name</label>
+            <input type="text">
+
+            <label>Last name</label>
+            <input type="text">
+
+            <input type="email" placeholder="Enter email...">
+
+            <button type="submit">Send</button>
+        </form>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <h3>Information</h3>
+        <p>
+            The passage experienced a surge in popularity during the 1960s
+            when Letraset used it on their dry-transfer sheets.
+        </p>
+    </footer>
+
+</body>
+</html>
+
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f2f2f2;
+}
+
+/* NAV */
+.nav {
+    background: #eee;
+    padding: 10px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #333;
+}
+
+/* TITLE */
+.title-bar {
+    background: #3a8ea8;
+    color: white;
+    text-align: center;
+    padding: 15px;
+}
+
+/* CONTENT */
+.content {
+    background: #d6c94f;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 30px;
+    padding: 40px;
+    align-items: center;
+}
+
+.content img {
+    width: 100%;
+}
+
+/* TABLE + FORM */
+.bottom {
+    background: #9fbf84;
+    display: flex;
+    gap: 40px;
+    padding: 30px;
+}
+
+/* TABLE */
+table {
+    border-collapse: collapse;
+    width: 50%;
+    background: white;
+}
+
+th {
+    background: #4e9db2;
+    color: white;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.orange {
+    background: orange;
+}
+
+.dark {
+    background: #444;
+    color: white;
+}
+
+/* FORM */
+.form {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form input {
+    padding: 8px;
+}
+
+.form button {
+    padding: 10px;
+    background: #eee;
+    border: none;
+    cursor: pointer;
+}
+
+/* FOOTER */
+.footer {
+    background: #1e1e2f;
+    color: white;
+    padding: 30px;
+}
