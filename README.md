@@ -28,13 +28,13 @@ GO
 ime i prezime zaposlenog, naziv teritorije i SalesQuota gde je SalesQuota veći ili jednak od 300000. 
 Tabele potrebne za upit: Sales.SalesPerson, Person.Person i Sales.SalesTerritory
 
-  1. Kreiranje nove baze i šeme
+  . Kreiranje nove baze i šeme
 U Object Explorer-u (leva strana), desni klik na folder Databases -> New Database.
 Upiši ime PrviKolokvijum2025 i klikni OK.
 Proširi novu bazu, desni klik na folder Security -> Schemas -> New Schema.
 Upiši Purchasing i klikni OK.
 
-  2. Kopiranje podataka (Import/Export Wizard)
+  . Kopiranje podataka (Import/Export Wizard)
 Umesto SELECT INTO koda, možeš koristiti čarobnjak koji je sigurniji:
 Desni klik na bazu AdventureWorks2016 -> Tasks -> Export Data....
 Source: Izaberi "SQL Server Native Client" i bazu AdventureWorks2016.
@@ -43,13 +43,13 @@ Izaberi opciju "Copy data from one or more tables or views".
 Na listi štikliraj samo tabele koje pored imena imaju [Purchasing].
 Klikni Next do kraja i Finish.
 
-  3. Ažuriranje podataka (Edit Rows)
+  . Ažuriranje podataka (Edit Rows)
 Ako ne želiš da pišeš UPDATE upit:
 Nađi tabelu koju treba da menjaš u Object Explorer-u.
 Desni klik na nju -> Edit Top 200 Rows.
 Samo klikni u polje (kolonu) koju želiš da promeniš, upiši novu vrednost (1, 2 ili 3) i pritisni Enter na tastaturi. Promena je odmah sačuvana u bazi.
 
-  4. Kreiranje View-a (View Designer)
+  . Kreiranje View-a (View Designer)
 Ovo je vizuelni način da spojiš tabele:
 U bazi AdventureWorks2016, desni klik na folder Views -> New View.
 U prozoru koji se otvori, dodaj tabele: SalesPerson, Person i SalesTerritory.
@@ -58,7 +58,7 @@ Povezivanje: Ako SSMS nije sam povukao linije, klikni mišem na BusinessEntityID
 Filter: U koloni Filter pored SalesQuota upiši >= 300000.
 Klikni na ikonicu diskete (Save) i nazovi view EmployeeSales.
 
-  5. Database Dijagram
+  . Database Dijagram
 Desni klik na Database Diagrams -> New Database Diagram.
 Selektuj sve tabele iz jedne šeme (npr. Purchasing) držeći taster Shift.
 Klikni Add, pa Close.
@@ -83,7 +83,7 @@ BEGIN
       AND SubTotal >= @MinTotal;
 END;
 
-4.Napraviti Cross Database upit koji kombinuje podatke iz restorovane baze i baze PrviKolokvijum2025. 
+4. Napraviti Cross Database upit koji kombinuje podatke iz restorovane baze i baze PrviKolokvijum2025. 
 Upit prikazuje Ime i prezime zaposlenog, Način dostave i sumirani TotalDue grupisano po godini narudžbine i
 ostalim neophodnim atributima. Upit ograničiti za osobe kojima je ime ’Linda’ i gde je sumirani TotalDue veći od 600000
 Tabele potrebne za upit: PurchaseOrderHeader (iz baze PrviKolokvijum2025), ShipMethod (iz baze PrviKolokvijum2025), Person.Person (Iz restorovane baze)
