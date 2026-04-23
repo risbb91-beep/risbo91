@@ -3,6 +3,8 @@ u novokreiranu bazu PrviKolokvijum2025 koristeći SELECT INTO naredbe.
 
 USE PrviKolokvijum2025;
 GO
+CREATE SCHEMA Purchasing;
+GO
 
 SELECT * INTO PrviKolokvijum2025.Purchasing.Vendor
 FROM AdventureWorks2016.Purchasing.Vendor;
