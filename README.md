@@ -134,7 +134,7 @@ Izaberi kategoriju Software and Database (ili kucaj u pretrazi "Database").
 Odaberi šablon Crow's Foot Database Notation (ovaj šablon koristi standardne "nožice" za relacije).
 Klikni na Create (ili Metric Units pa Create).
 
-  2. Kreiranje tabela Dimenzija (Sporedne tabele)
+  a. Kreiranje tabela Dimenzija (Sporedne tabele)
 Iz palete sa leve strane (Shapes) prevuci oblik Entity na sredinu ekrana.
 Tabela DimTarifa:
 Klikni na naslov "Entity" i promeni u DimTarifa.
@@ -146,7 +146,7 @@ Tabela DimDatum:
 Prevuci novi Entity, nazovi ga DimDatum.
 Kolone: DatumKey (PK), Dan, Mesec, Godina, Kvartal.
   
-  3. Kreiranje tabele Činjenica (Centralna tabela)
+  b. Kreiranje tabele Činjenica (Centralna tabela)
 Ova tabela mora biti u sredini jer se sve ostale spajaju sa njom.
 Tabela FactVoznje:
 Prevuci Entity, nazovi ga FactVoznje.
@@ -154,21 +154,21 @@ Primarni ključ: VoznjaID (PK).
 Strani ključevi (veza sa dimenzijama): TarifaKey, DobavljacKey, DatumKey.
 Mere (Brojevi): BrojPoziva, UkupnaCena, TrajanjeVoznje.
   
-  4. Povezivanje (Relacije)
+  c. Povezivanje (Relacije)
 Iz palete Shapes uzmi alat Relationship.
 Pravilo: Uvek spajaš PK iz dimenzije sa FK u Fact tabeli.
 Klikni na jedan kraj konektora i zakači ga za DimTarifa, a drugi kraj za FactVoznje.
 Uradi isto za DimDobavljac i DimDatum.
 Rezultat treba da izgleda kao zvezda (Star Schema).
   
-  5. Dodavanje Pie Chart-a (Zahtev pod b)
+  d. Dodavanje Pie Chart-a (Zahtev pod b)
 Pošto Visio dozvoljava grafičke elemente:
 U gornjem meniju idi na Insert -> Chart (ako tvoja verzija ima tu opciju) ili...
 Sa leve strane u pretrazi oblika kucaj "Pie chart".
 Prevuci kružni dijagram pored tabele DimDobavljac.
 Dva puta klikni na njega da uneseš legende (npr. "Dobavljač A 40%", "Dobavljač B 60%").
   
-  6. Čuvanje fajla (Tačna lokacija)
+  e. Čuvanje fajla (Tačna lokacija)
 Idi na File -> Save As.
 Klikni na Browse.
 Navigiraj do D:/MIS Jun 2022/.
@@ -176,10 +176,11 @@ U polje za ime upiši tvoje ime-prezime.vsdx.
 Klikni Save.
 Pro savet za kolokvijum: Ako primetiš da ti se linije relacija "lome" neuredno, desni klik na liniju -> Straight Connector da bi dijagram izgledao profesionalnije.
 
+
 3. Napraviti u okviru postojeće restorovane baze u SQL serveru virtuelne tabele koje će odgovarati modelu skladišta podataka
 
  Naravno, kreiranje virtuelnih tabela (View-ova) putem GUI-ja je zapravo vizuelno slaganje slagalice. Evo kako da to uradiš korak po korak u SQL Server Management Studio:
-  1. Kreiranje virtuelne tabele činjenica (vFactVoznje)
+  a. Kreiranje virtuelne tabele činjenica (vFactVoznje)
 U Object Explorer-u, proširi bazu, desni klik na folder Views -> New View....
 U prozoru koji iskoči, dodaj tabelu koja sadrži glavne podatke (npr. PurchaseOrderHeader ako simuliramo nabavku/vožnje). Klikni Add, pa Close.
 Štikliraj kolone: Izaberi PurchaseOrderID, VendorID, ShipMethodID, OrderDate i TotalDue.
@@ -190,19 +191,19 @@ ShipMethodID -> TarifaKey
 Dodavanje godine/meseca: U prazan red u koloni Column upiši YEAR(OrderDate) i daj mu Alias Godina.
 Klikni na Save (ikonica diskete) i nazovi view vFactVoznje.
   
-  2. Kreiranje virtuelne dimenzije (vDimDobavljac)
+  b. Kreiranje virtuelne dimenzije (vDimDobavljac)
 Ponovo desni klik na Views -> New View....
 Dodaj tabelu Vendor.
 Štikliraj BusinessEntityID (Alias: DobavljacKey) i Name (Alias: NazivDobavljaca).
 Sačuvaj kao vDimDobavljac.
   
-  3. Kreiranje virtuelne dimenzije (vDimTarifa)
+  c. Kreiranje virtuelne dimenzije (vDimTarifa)
 Desni klik na Views -> New View....
 Dodaj tabelu ShipMethod (koja nam služi kao izvor za tarife/načine dostave).
 Štikliraj ShipMethodID (Alias: TarifaKey) i Name (Alias: NazivTarife).
 Sačuvaj kao vDimTarifa.
   
-  4.U Object Explorer-u, desni klik na folder Views -> New View....
+  d.U Object Explorer-u, desni klik na folder Views -> New View....
 Dodaj tabelu koja ima datume (npr. SalesOrderHeader ili PurchaseOrderHeader). Klikni Add, pa Close.
 U donjoj tabeli (gde piše Column, Alias, Table...), ručno unesi sledeće redove:
 Column	Alias	Objašnjenje
@@ -220,7 +221,7 @@ Kako da ih vidiš u dijagramu?
 Kada odeš na Database Diagrams -> New Diagram, možeš dodati ove View-ove isto kao i obične tabele (samo klikni na tab Views u prozoru za dodavanje).
  Tako ćeš vizuelno potvrditi da tvoje virtuelne tabele čine Star Schema koju si nacrtao u Visio-u.
 
-4.Pokrenuti PowerBI, povezati se na prethodno restorovanu bazu, odnosno na njene virtuelne tabele i kreirati izveštaje za zahteve opisane u zadatku 3
+4. Pokrenuti PowerBI, povezati se na prethodno restorovanu bazu, odnosno na njene virtuelne tabele i kreirati izveštaje za zahteve opisane u zadatku 3
 
 Povezivanje na bazu
 Otvori Power BI Desktop.
@@ -257,7 +258,7 @@ Proveri da li su View-ovi povezani. Ako nisu, prevuci DobavljacKey iz vDimDobavl
 Uradi isto za TarifaKey i DatumKey.
 
 
-* dopuna : Pozicionirati se u restorovanu bazu i u tabeli XXX ažurirati sledeće podatke
+*** dopuna : Pozicionirati se u restorovanu bazu i u tabeli XXX ažurirati sledeće podatke
 a.	Kolona A na 1
 b.	Kolona B na 2
 c.	Kolona C na 3  u gui?
