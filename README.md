@@ -30,41 +30,24 @@ GO
 ime i prezime zaposlenog, naziv teritorije i SalesQuota gde je SalesQuota veći ili jednak od 300000. 
 Tabele potrebne za upit: Sales.SalesPerson, Person.Person i Sales.SalesTerritory
 
-  . Kreiranje nove baze i šeme
-U Object Explorer-u (leva strana), desni klik na folder Databases -> New Database.
-Upiši ime PrviKolokvijum2025 i klikni OK.
-Proširi novu bazu, desni klik na folder Security -> Schemas -> New Schema.
-Upiši Purchasing i klikni OK.
-
-  . Kopiranje podataka (Import/Export Wizard)
-Umesto SELECT INTO koda, možeš koristiti čarobnjak koji je sigurniji:
-Desni klik na bazu AdventureWorks2016 -> Tasks -> Export Data....
-Source: Izaberi "SQL Server Native Client" i bazu AdventureWorks2016.
-Destination: Ponovo "SQL Server Native Client", ali izaberi tvoju novu bazu PrviKolokvijum2025.
-Izaberi opciju "Copy data from one or more tables or views".
-Na listi štikliraj samo tabele koje pored imena imaju [Purchasing].
-Klikni Next do kraja i Finish.
-
-  . Ažuriranje podataka (Edit Rows)
-Ako ne želiš da pišeš UPDATE upit:
-Nađi tabelu koju treba da menjaš u Object Explorer-u.
-Desni klik na nju -> Edit Top 200 Rows.
-Samo klikni u polje (kolonu) koju želiš da promeniš, upiši novu vrednost (1, 2 ili 3) i pritisni Enter na tastaturi. Promena je odmah sačuvana u bazi.
-
-  . Kreiranje View-a (View Designer)
-Ovo je vizuelni način da spojiš tabele:
-U bazi AdventureWorks2016, desni klik na folder Views -> New View.
-U prozoru koji se otvori, dodaj tabele: SalesPerson, Person i SalesTerritory.
-Povezivanje: Ako SSMS nije sam povukao linije, klikni mišem na BusinessEntityID u jednoj tabeli i "prevuci" ga na isti taj ID u drugoj.
-Štikliraj kolone: Izaberi BusinessEntityID, FirstName, LastName, Name (iz teritorije) i SalesQuota.
-Filter: U koloni Filter pored SalesQuota upiši >= 300000.
-Klikni na ikonicu diskete (Save) i nazovi view EmployeeSales.
-
-  . Database Dijagram
-Desni klik na Database Diagrams -> New Database Diagram.
-Selektuj sve tabele iz jedne šeme (npr. Purchasing) držeći taster Shift.
+ Pozicioniraj se: U Object Explorer-u nađi bazu AdventureWorks2016.
+Otvori alat: Desni klik na folder Views -> New View....
+Dodaj tabele: Iz prozora koji se otvori (Add Table) izaberi ove tri:
+Person (Person)
+SalesPerson (Sales)
+SalesTerritory (Sales)
 Klikni Add, pa Close.
-SSMS će sam rasporediti tabele i nacrtati relacije. Sačuvaj dijagram pod imenom te šeme.
+Poveži (ako linije već ne postoje):
+Prevuči BusinessEntityID iz Person na BusinessEntityID u SalesPerson.
+Prevuči TerritoryID iz SalesPerson na TerritoryID u SalesTerritory.
+Izaberi kolone (štikliraj):
+BusinessEntityID (iz tabele SalesPerson ili Person)
+FirstName i LastName (iz tabele Person)
+Name (iz tabele SalesTerritory) -> ovde u koloni Alias upiši Naziv teritorije.
+SalesQuota (iz tabele SalesPerson).
+Postavi uslov: U redu gde je kolona SalesQuota, u koloni Filter upiši: >= 300000.
+Sačuvaj: Klikni na disketu (Save) i upiši ime: EmployeeSales. (SSMS će sam dodati Sales. ispred ako ga snimaš u tu šemu, ili samo kucaj Sales.EmployeeSales).
+
 
 3.	U restorovanoj bazi kreirati stored proceduru Sales.OrdersByCustomer koja prima parametre @CustomerID tipa INT I @MinTotal tipa Money I za 
 zadatog kupca vraća njegove porudžbine gde je Subtotal veće ili jednako od @MinTotal. Tabela potrebna za upit: Sales.SalesOrderHeader
