@@ -1,3 +1,18 @@
+Potrebno je kreirati mini Angular aplikaciju koja u sebi sadrži funkcionalnost ažuriranja jednog šifarnika. K
+oristeći REST API metode sa udaljenog servera dobićete podatke koji treba prikazati. 
+Početna stranica treba da sadrži samo podatke o studentu, ime, prezime i broj indeksa. 
+U gornjem delu forme treba da postoji link koji vodi na stranicu za prikaz podataka (koristiti angular routing) i link ka toj početnoj stranici
+(home i podaci). Koristeći GET metodu u okviru httpClient-a dovući podatke sa servera i prikazati u tabeli. 
+Potrebno je omogućiti filtriranje podataka koristeći pipe. Filtriranje mora da obuhvati minimum dve kolone iz tabele.
+Svaki podatak (red u tabeli) u tabeli treba da ima mogućnost da se obriše koristeći DELETE metodu. 
+Prilikom brisanja podatka potrebno je dodati modalni prozor za potvrdu brisanja. 
+Pored pregleda podataka potrebno je omogućiti izmenu i dodavanje podatka koristeći POST i PUT metodu. 
+Prelaskom miša preko svakog reda u tabeli treba da taj red istakne sivom bojom pozadine tog reda.
+Koristiti Angular material za dodatne poene.
+
+
+
+
 Otvorite terminal (ili komandnu liniju u Visual Studio Code-u) i pokrenite sledeće naredbe:
 # 1. Kreiranje novog Angular projekta sa omogućenim rutingom
 ng new mini-sifarnik-app --routing --style=css
