@@ -1,0 +1,295 @@
+Klasa Student treba da ima atribute FirstName, LastName, IndexNumber
+
+Dodati novi projekat (Class Library) za rad sa tekstualnim podacima.
+U projekat dodati interface ITextRepository koji ima sledece metode:
+List<Student> GetStudent()
+Student GetStudent(string indexNumber)
+bool AddStudent(Student s)
+bool DeleteStudent(string indexNumber)
+
+Dodati i klasu TextRepository koja implementira interface ITextRepository
+U glavnom programu napisati implementaciju ovih metoda i testirati program.
+
+// Napomena
+Studenti se u tekstualnom fajlu cuvaju u formatu
+001;Pera;Peric
+
+Ukoliko student sa trazenim brojem indeksa postoji, ispisati njegove podatke u konzoli. 
+Ukoliko ne postoji ispisati odgovarajucu poruku.
+
+u c#
+
+
+***1. Kreiranje glavnog konzolnog projektaOtvorite Visual Studio.Izaberite Create a new project.
+U pretrazi ukucajte Console App (izaberite verziju za C#).Nazovite projekat StudentApp, a polje Solution name (naziv rešenja) nazovite StudentSolution.
+Kliknite Next.U padajućem meniju za Framework izaberite .NET 8.0 (Long-term support). 
+Kliknite Create.2. Kreiranje projekta za rad sa tekstualnim podacima (Class Library)U Solution Explorer-u (desna strana ekrana),
+uradite desni klik na vrh – na naziv rešenja StudentSolution.Izaberite Add ➡️ New Project...U pretrazi ukucajte Class Library.
+⚠️ KLJUČAN KORAK: Izaberite šablon koji se zove isključivo Class Library (sa oznakom C#). 
+Nemojte birati "Class Library (.NET Framework)" jer je to starija verzija 4.8. Kliknite Next.Nazovite ovaj projekat DataLayer.
+Kliknite Next.U padajućem meniju za Framework izaberite isti .NET 8.0 (Long-term support). Kliknite Create.
+Unutar projekta DataLayer automatski će se napraviti fajl Class1.cs. Desni klik na njega i izaberite Delete da biste ga obrisali.🔗
+KORAK 2: Povezivanje Projekata (Project References)Da bi projekti mogli međusobno da koriste klase i interfejse, moramo ih povezati u oba smera.
+Smer A: Omogućavamo DataLayer-u da vidi klasu StudentDesni klik na projekat DataLayer ➡️ Add ➡️ Project Reference...
+Štiklirajte kućicu pored projekta StudentApp i kliknite OK.
+Smer B: Omogućavamo glavnom programu StudentApp da vidi repozitorijumDesni klik na projekat StudentApp ➡️ Add ➡️ Project Reference...
+Štiklirajte kućicu pored projekta DataLayer i kliknite OK.📝
+KORAK 3: Pisanje Koda po Klasama i FajlovimaSada ćemo kreirati tačno 4 fajla sa čistim i prokomentarisanim kodom.📄
+Fajl 1: Student.cs (Kreirate unutar projekta StudentApp)Desni klik na StudentApp ➡️ Add ➡️ Class... ➡️ Naziv: Student.cs
+using System;
+
+namespace StudentApp
+{
+    public class Student
+    {
+        // Atributi (svojstva) zahtevani zadatkom
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string IndexNumber { get; set; }
+
+        // Prazan konstruktor
+        public Student() { }
+
+        // Konstruktor sa parametrima za lakše kreiranje objekata
+        public Student(string indexNumber, string firstName, string lastName)
+        {
+            IndexNumber = indexNumber;
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        // Preklapanje metode ToString() za lepši ispis podataka u konzoli
+        public override string ToString()
+        {
+            return $"Indeks: {IndexNumber} | Ime: {FirstName} | Prezime: {LastName}";
+        }
+    }
+}
+
+Fajl 2: ITextRepository.cs (Kreirate unutar projekta DataLayer)Desni klik na DataLayer ➡️ Add ➡️ Class... ➡️ Naziv: ITextRepository.cs
+
+using System.Collections.Generic;
+using StudentApp; // Uvozimo projekat StudentApp da bi interfejs prepoznao klasu Student
+
+namespace DataLayer
+{
+    public interface ITextRepository
+    {
+        // Metode striktno zahtevane tekstom zadatka
+        List<Student> GetStudent();
+        Student GetStudent(string indexNumber);
+        bool AddStudent(Student s);
+        bool DeleteStudent(string indexNumber);
+    }
+}
+
+Fajl 3: TextRepository.cs (Kreirate unutar projekta DataLayer)Desni klik na DataLayer ➡️ Add ➡️ Class... ➡️ Naziv: TextRepository.cs
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using StudentApp; // Uvozimo projekat StudentApp radi korišćenja klase Student
+
+namespace DataLayer
+{
+    public class TextRepository : ITextRepository
+    {
+        // Tekstualni fajl će se čuvati u bin/Debug folderu projekta
+        private readonly string filePath = "studenti.txt";
+
+        public TextRepository()
+        {
+            // Ako fajl ne postoji na disku, kreiramo ga pri pokretanju programa
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Close();
+            }
+        }
+
+        // 1. Čitanje svih studenata iz tekstualnog fajla
+        public List<Student> GetStudent()
+        {
+            List<Student> lista = new List<Student>();
+            string[] sveLinije = File.ReadAllLines(filePath);
+
+            foreach (string linija in sveLinije)
+            {
+                if (string.IsNullOrWhiteSpace(linija)) continue;
+
+                // Delimo tekst po znaku tačka-zapeta (;) prema formatu: 001;Pera;Peric
+                string[] delovi = linija.Split(';');
+                if (delovi.Length == 3)
+                {
+                    Student s = new Student
+                    {
+                        IndexNumber = delovi[0],
+                        FirstName = delovi[1],
+                        LastName = delovi[2]
+                    };
+                    lista.Add(s);
+                }
+            }
+            return lista;
+        }
+
+        // 2. Pretraga studenta na osnovu broja indeksa
+        public Student GetStudent(string indexNumber)
+        {
+            List<Student> sviStudenti = GetStudent();
+            foreach (Student s in sviStudenti)
+            {
+                if (s.IndexNumber == indexNumber)
+                {
+                    return s; // Student je pronađen
+                }
+            }
+            return null; // Vraća null ukoliko student ne postoji
+        }
+
+        // 3. Dodavanje novog studenta u tekstualni fajl
+        public bool AddStudent(Student s)
+        {
+            // Validacija: Sprečavamo upis ukoliko indeks već postoji u fajlu
+            if (GetStudent(s.IndexNumber) != null)
+            {
+                return false; 
+            }
+
+            // Formatiranje linije za upis
+            string novaLinija = $"{s.IndexNumber};{s.FirstName};{s.LastName}";
+            File.AppendAllLines(filePath, new List<string> { novaLinija });
+            return true;
+        }
+
+        // 4. Brisanje studenta iz tekstualnog fajla preko indeksa
+        public bool DeleteStudent(string indexNumber)
+        {
+            List<Student> sviStudenti = GetStudent();
+            bool obrisan = false;
+            List<string> noveLinije = new List<string>();
+
+            foreach (Student s in sviStudenti)
+            {
+                if (s.IndexNumber == indexNumber)
+                {
+                    obrisan = true;
+                    continue; // Preskačemo ovog studenta (brišemo ga)
+                }
+                noveLinije.Add($"{s.IndexNumber};{s.FirstName};{s.LastName}");
+            }
+
+            if (obrisan)
+            {
+                // Prepisujemo fajl novim podacima (bez obrisanog studenta)
+                File.WriteAllLines(filePath, noveLinije);
+            }
+            return obrisan;
+        }
+    }
+}
+
+Fajl 4: Program.cs (Zamenjujete postojeći kod unutar projekta StudentApp)Otvorite Program.cs u konzolnoj aplikaciji i zamenite ceo kod sledećim rešenjem:
+
+using System;
+using System.Collections.Generic;
+using DataLayer; // Uvozimo naš Class Library sloj podataka
+
+namespace StudentApp
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Instanciranje repozitorijuma preko interfejsa (Dobra arhitektonska praksa)
+            ITextRepository repo = new TextRepository();
+
+            Console.WriteLine("=== 1. AUTOMATSKO PUNJENJE I TEST DODAVANJA ===");
+            
+            Student s1 = new Student("001", "Pera", "Peric");
+            Student s2 = new Student("002", "Ana", "Anic");
+            Student s3 = new Student("003", "Marko", "Markovic");
+
+            UpisiIObavesti(repo, s1);
+            UpisiIObavesti(repo, s2);
+            UpisiIObavesti(repo, s3);
+
+
+            Console.WriteLine("\n=== 2. TRENUTNI ISPIS SVIH STUDENATA IZ FAJLA ===");
+            IspisiSveIzFajla(repo);
+
+
+            Console.WriteLine("\n=== 3. ZAHTEV ZADATKA: PRETRAGA PO INDEKSU ===");
+            Console.Write("Unesite broj indeksa studenta kojeg tražite: ");
+            string unosIndeksa = Console.ReadLine();
+
+            // Poziv metode za pretragu
+            Student trazeniStudent = repo.GetStudent(unosIndeksa);
+
+            // LOGIKA IZ TEKSTA ZADATKA: Isčitavanje i provera postojanja
+            if (trazeniStudent != null)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"[USPEH]: Pronađen student -> {trazeniStudent}");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[OBAVEŠTENJE]: Student sa brojem indeksa '{unosIndeksa}' ne postoji u bazi!");
+                Console.ResetColor();
+            }
+
+
+            Console.WriteLine("\n=== 4. TESTIRANJE METODE BRISANJA ===");
+            Console.Write("Unesite broj indeksa za brisanje: ");
+            string indeksZaBrisanje = Console.ReadLine();
+
+            if (repo.DeleteStudent(indeksZaBrisanje))
+            {
+                Console.WriteLine($"Student sa indeksom {indeksZaBrisanje} je uspešno uklonjen iz fajla.");
+            }
+            else
+            {
+                Console.WriteLine("Greška. Student sa tim indeksom nije pronađen.");
+            }
+
+
+            Console.WriteLine("\n=== 5. KONAČNO STANJE U TEKSTUALNOM FAJLU ===");
+            IspisiSveIzFajla(repo);
+
+            // Čuvanje prozora konzole otvorenim
+            Console.ReadLine();
+        }
+
+        // Pomoćna metoda za ispis obaveštenja o uspešnosti upisa
+        static void UpisiIObavesti(ITextRepository repo, Student s)
+        {
+            if (repo.AddStudent(s))
+            {
+                Console.WriteLine($"Dodat u fajl: {s.FirstName} {s.LastName} ({s.IndexNumber})");
+            }
+            else
+            {
+                Console.WriteLine($"Preskočeno: Student sa indeksom {s.IndexNumber} već postoji.");
+            }
+        }
+
+        // Pomoćna metoda za čitanje cele liste i štampanje u konzoli
+        static void IspisiSveIzFajla(ITextRepository repo)
+        {
+            List<Student> trenutniStudenti = repo.GetStudent();
+            if (trenutniStudenti.Count == 0)
+            {
+                Console.WriteLine("Fajl je prazan.");
+            }
+            else
+            {
+                foreach (Student s in trenutniStudenti)
+                {
+                    Console.WriteLine(s);
+                }
+            }
+        }
+    }
+}
+
