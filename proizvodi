@@ -1,0 +1,57 @@
+
+    
+    
+  public class Proizvod
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public decimal Cena { get; set; }
+        public decimal Popust { get; set; }
+        public bool Aktivan { get; set; }
+
+        public enum Tipovi
+        {
+            prehrambeni,hemija,kancelarijskiPribor
+        }
+        public Tipovi Tip { get; set; }
+
+        public Proizvod()
+        {
+            
+        }
+
+        public Proizvod(string naziv, decimal cena, Tipovi tip)
+        {
+            Naziv = naziv;
+            Cena = cena;
+            Tip = tip;
+            Aktivan = true;
+        }
+
+        public decimal MetodaCenaSaPopustom()
+        {
+            return Cena - Cena * Popust / 100;
+        }
+
+        //Dodatna metoda iz januarskog roka
+        public void MetodaPromenaCene(decimal cena)
+        {
+            Cena = cena;
+        }
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Proizvod pro = new Proizvod("Jafa", 200, Proizvod.Tipovi.prehrambeni);
+            pro.Opis = "Keks";
+            pro.Popust = 20;
+
+            Console.WriteLine(pro.MetodaCenaSaPopustom());
+
+            pro.MetodaPromenaCene(300);
+
+            Console.ReadKey();
+        }
+    }
