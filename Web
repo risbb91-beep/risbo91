@@ -1,0 +1,225 @@
+Predstavlja podatke i logiku. Npr. klasa Book sa poljima Name, Author, Title...ViewPrikaz podataka korisniku. 
+
+
+
+
+KORAK 1: Kreiranje i instalacija paketaPrati korake 1 i 2 iz svog teksta da napraviš projekat koji se zove Priprema.
+Kada se projekat otvori, prva stvar koju moraš da uradiš je instalacija alata za rad sa bazom (Korak 3).
+U vrhu Visual Studio-a klikni na: Tools -> NuGet Package Manager -> Manage NuGet Packages for Solution...
+Klikni na tab Browse i u pretragu ukucaj i instaliraj ova tri paketa (jedan po jedan)
+:Microsoft.EntityFrameworkCoreMicrosoft.EntityFrameworkCore.SqlServerMicrosoft.EntityFrameworkCore.ToolsKORAK 
+
+2: Pravljenje foldera i klasaKao što piše u tvom uputstvu, desnim klikom na projekat u Solution Explorer-u 
+(sa desne strane ekrana) biraš Add -> New Folder.Napravi folder Data i u njemu klasu BookDB.cs (iskopiraj kod iz svog teksta).
+Napravi folder Repository, u njemu podfoldere Interface i Implementation, pa unutra dodaj IBookRepository.cs i BookRepository.cs.KORAK
+
+3: Kako da kreiraš bazu na svom računaru? (Najčešća tačka spoticanja)Kada iskopiraš ConnectionStrings u tvoj appsettings.json,
+moraš reći programu da napravi tu bazu u SQL-u.U vrhu Visual Studio-a klikni na: Tools -> NuGet Package Manager -> Package Manager Console
+.Na dnu ekrana će ti se otvoriti komandna linija (plavi ili crni prozor).Ukucaj tačno ovo i pritisni Enter:Add-Migration InitialCreate
+.(Ovo će pripremiti nacrt baze).Kada napiše "Success", ukucaj sledeću komandu i pritisni Enter: Update-Database
+
+KORAK 4: Popravka i dopuna Program.cs fajlaPošto se tvoj kod u Program.cs prekinuo na pola, otvori taj fajl u svom projektu,
+obriši sve iz njega i nalepi ovaj kompletan i ispravan kod:
+using Microsoft.EntityFrameworkCore;
+using Priprema.Data;
+using Priprema.Repository.Impementation;
+using Priprema.Repository.Interface;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. Registracija baze podataka
+builder.Services.AddDbContext<BookDB>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionString"));
+});
+
+// 2. Registracija repozitorijuma
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+
+// 3. Podrška za MVC (Kontrolere i Poglede)
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+// Konfiguracija HTTP zahteva
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+// 4. Definisanje početne stranice (Kada se pokrene aplikacija, otvara se Book kontroler)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Book}/{action=Index}/{id?}");
+
+app.Run();
+
+ŠTA TI SADA FALI DA BI PROJEKAT RADIO? (Nastavak uputstva)U tvom dokumentu nedostaju koraci 8, 9 i 10. Bez njih aplikacija ne može da se pokrene. 
+Evo koda koji treba da dodaš:
+KORAK 8: Kreiranje BookController.cs (Kontroler)Desni klik na folder Controllers -> Add -> Class...Nazovi je BookController.cs i unesi sledeći kod:
+
+using Microsoft.AspNetCore.Mvc;
+using Priprema.Models;
+using Priprema.Repository.Interface;
+
+namespace Priprema.Controllers
+{
+    public class BookController : Controller
+    {
+        private readonly IBookRepository _repo;
+
+        // Kontroler kroz konstruktor traži repozitorijum (Dependency Injection)
+        public BookController(IBookRepository repo)
+        {
+            _repo = repo;
+        }
+
+        // 1. PRIKAZ SVIH KNJIGA (GET)
+        public IActionResult Index()
+        {
+            var knjige = _repo.GetAllBooks();
+            return View(knjige);
+        }
+
+        // 2. STRANICA ZA KREIRANJE KNJIIGE (Prikaz forme)
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // 3. SLANJE PODATAKA IZ FORME U BAZU (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Book book)
+        {
+            if (ModelState.IsValid)
+            {
+                _repo.CreateBook(book);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(book);
+        }
+
+        // 4. STRANICA ZA IZMENU KNJIGE (Prikaz forme sa starim podacima)
+        public IActionResult Edit(int id)
+        {
+            var knjiga = _repo.GetBookByID(id);
+            if (knjiga == null) return NotFound();
+            return View(knjiga);
+        }
+
+        // 5. SLANJE IZMENJENIH PODATAKA U BAZU (POST/PUT)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Book book)
+        {
+            if (ModelState.IsValid)
+            {
+                _repo.EditBook(id, book);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(book);
+        }
+
+        // 6. BRISANJE KNJIGE
+        public IActionResult Delete(int id)
+        {
+            _repo.Delete(id);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
+
+KORAK 9: Pravljenje HTML stranica (Views)U folderu Views napravi novi folder koji se zove Book (mora se zvati isto kao kontroler).
+Unutar foldera Views/Book napravićemo dve osnovne stranice.Stranica 1: Index.cshtml 
+(Prikaz tabele sa knjigama)Desni klik na folder Views/Book -> Add -> New Item... -> Izaberi Razor View - Empty -> Nazovi ga Index.cshtml.Unesi ovaj kod:
+
+@model IEnumerable<Priprema.Models.Book>
+
+@{
+    ViewData["Title"] = "Sve Knjige";
+}
+
+<h2>Spisak svih knjiga</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Dodaj novu knjigu</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Naziv</th>
+            <th>Naslov</th>
+            <th>Autor</th>
+            <th>Datum izdavanja</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Title</td>
+                <td>@item.Author</td>
+                <td>@item.PublishDate.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.BookId" class="btn btn-sm btn-warning">Izmeni</a> |
+                    <a asp-action="Delete" asp-route-id="@item.BookId" class="btn btn-sm btn-danger" onclick="return confirm('Sigurno brišete?')">Obriši</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+Stranica 2: Create.cshtml (Forma za dodavanje)Desni klik na folder Views/Book -> Add -> New Item... -> 
+Izaberi Razor View - Empty -> Nazovi ga Create.cshtml.Unesi ovaj kod:
+
+@model Priprema.Models.Book
+
+@{
+    ViewData["Title"] = "Dodaj Knjigu";
+}
+
+<h2>Dodaj novu knjigu</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div class="form-group mb-2">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="Author" class="control-label"></label>
+                <input asp-for="Author" class="form-control" />
+                <span asp-validation-for="Author" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="PublishDate" class="control-label"></label>
+                <input asp-for="PublishDate" type="date" class="form-control" />
+                <span asp-validation-for="PublishDate" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-success">Sačuvaj</button>
+            <a asp-action="Index" class="btn btn-secondary">Nazad</a>
+        </form>
+    </div>
+</div>
+
+
+
+
