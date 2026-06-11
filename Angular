@@ -1,0 +1,450 @@
+Otvorite terminal (ili komandnu liniju u Visual Studio Code-u) i pokrenite sledeće naredbe:
+# 1. Kreiranje novog Angular projekta sa omogućenim rutingom
+ng new mini-sifarnik-app --routing --style=css
+cd mini-sifarnik-app
+
+# 2. Dodavanje Angular Material biblioteke u projekat
+ng add @angular/material
+
+(Tokom instalacije Angular Material-a, izaberite bilo koju temu, npr. Indigo/Pink, i potvrdite sa Y za uključivanje globalnih stilova i animacija).
+
+Korak 2: Kreiranje strukture aplikacije (Komponente, Servis i Pipe)Generišite sve potrebne fajlove kroz Angular CLI:bash# Kreiranje komponenti
+ng g c komponente/pocetna
+ng g c komponente/prikaz-podataka
+ng g c komponente/dijalog-potvrda
+ng g c komponente/forma-podatak
+
+# Kreiranje servisa
+ng g s servisi/sifarnik
+
+# Kreiranje prilagođenog pipe-a za filtriranje
+ng g p pipe/filtriranje
+
+Korak 3: Konfiguracija rutinga i glavnog navigacionog menijaOtvorite fajl src/app/app.routes.ts i definišite rute za Home (početnu) i Prikaz podataka:
+
+import { Routes } from '@angular/router';
+import { PocetnaComponent } from './komponente/pocetna/pocetna.component';
+import { PrikazPodatakaComponent } from './komponente/prikaz-podataka/prikaz-podataka.component';
+
+export const routes: Routes = [
+  { path: 'home', component: PocetnaComponent },
+  { path: 'podaci', component: PrikazPodatakaComponent },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '**', redirectTo: '/home' }
+];
+
+Sada otvorite glavnu strukturu aplikacije u src/app/app.component.html i dodajte navigacione linkove pomoću Angular Material toolbar-a:
+
+<mat-toolbar color="primary">
+  <span>Aplikacija Šifarnik</span>
+  <span class="spacer"></span>
+  <button mat-button routerLink="/home" routerLinkActive="active-link">Home</button>
+  <button mat-button routerLink="/podaci" routerLinkActive="active-link">Podaci</button>
+</mat-toolbar>
+
+<div class="kontejner">
+  <router-outlet></router-outlet>
+</div>
+
+Dodajte prateći CSS u src/app/app.component.css:
+
+.spacer {
+  flex: 1 1 auto;
+}
+.kontejner {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.active-link {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+Uključite potrebne module u src/app/app.component.ts:
+
+import { Component } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {}
+
+Korak 4: Omogućavanje HTTP klijenta i konfiguracijaDa bismo mogli da komuniciramo sa udaljenim serverom, 
+moramo da obezbedimo HttpClient u aplikaciji. Otvorite src/app/app.config.ts i dodajte provideHttpClient():
+
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideHttpClient } from '@angular/common/http'; // <--- Uvesti ovo
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideAnimationsAsync(),
+    provideHttpClient() // <--- Dodati ovde
+  ]
+};
+
+Korak 5: Početna strana (Podaci o studentu)Otvorite src/app/komponente/pocetna/pocetna.component.html i unesite tražene informacije koristeći mat-card:
+
+<mat-card class="student-card">
+  <mat-card-header>
+    <mat-card-title>Profil Studenta</mat-card-title>
+    <mat-card-subtitle>Ispitni projekat</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p><strong>Ime:</strong> Petar</p>
+    <p><strong>Prezime:</strong> Petrović</p>
+    <p><strong>Broj indeksa:</strong> E123/2026</p>
+  </mat-card-content>
+</mat-card>
+
+Dodajte u src/app/komponente/pocetna/pocetna.component.ts potreban import:
+
+import { Component } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+
+@Component({
+  selector: 'app-pocetna',
+  standalone: true,
+  imports: [MatCardModule],
+  templateUrl: './pocetna.component.html',
+  styleUrls: ['./pocetna.component.css']
+})
+export class PocetnaComponent {}
+
+Prvo, napravite model (interfejs) za objekat šifarnika. Kreirajte fajl src/app/modeli/podatak.model.ts:
+
+export interface Podatak {
+  id?: number;
+  naziv: string;
+  kategorija: string;
+}
+
+Sada podesite src/app/servisi/sifarnik.service.ts koji izvršava GET, POST, PUT i DELETE metode:
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Podatak } from '../modeli/podatak.model';
+
+@Injectable({
+  providedIn: 'root'
+}}
+export class SifarnikService {
+  // Promenite URL u vaš stvarni REST API endpoint sa udaljenog servera
+  private apiUrl = 'https://primer-servera.com'; 
+
+  constructor(private http: HttpClient) {}
+
+  // GET metoda za dohvatanje podataka
+  getPodaci(): Observable<Podatak[]> {
+    return this.http.get<Podatak[]>(this.apiUrl);
+  }
+
+  // POST metoda za dodavanje novog podatka
+  dodajPodatak(podatak: Podatak): Observable<Podatak> {
+    return this.http.post<Podatak>(this.apiUrl, podatak);
+  }
+
+  // PUT metoda za izmenu postojećeg podatka
+  izmeniPodatak(id: number, podatak: Podatak): Observable<Podatak> {
+    return this.http.put<Podatak>(`${this.apiUrl}/${id}`, podatak);
+  }
+
+  // DELETE metoda za brisanje podatka
+  obrisiPodatak(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}
+
+
+Korak 7: Kreiranje prilagođenog Pipe-a za filtriranje dve kolonePravimo logiku koja filtrira i kolonu naziv i kolonu kategorija.
+Otvorite src/app/pipe/filtriranje.pipe.ts:
+
+import { Pipe, PipeTransform } from '@angular/core';
+import { Podatak } from '../modeli/podatak.model';
+
+@Pipe({
+  name: 'filtriranje',
+  standalone: true
+})
+export class FiltriranjePipe implements PipeTransform {
+  transform(podaci: Podatak[], tekstZaPretragu: string): Podatak[] {
+    if (!podaci || !tekstZaPretragu) {
+      return podaci;
+    }
+    
+    const pretraga = tekstZaPretragu.toLowerCase();
+    
+    // Filtriranje obuhvata dve kolone: naziv i kategorija
+    return podaci.filter(p => 
+      p.naziv.toLowerCase().includes(pretraga) || 
+      p.kategorija.toLowerCase().includes(pretraga)
+    );
+  }
+}
+
+Korak 8: Modalni prozor za potvrdu brisanjaOtvorite src/app/komponente/dijalog-potvrda/dijalog-potvrda.component.html:
+<h2 mat-dialog-title>Potvrda brisanja</h2>
+<mat-dialog-content>Da li ste sigurni da želite da obrišete ovaj podatak?</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="false">Odustani</button>
+  <button mat-button color="warn" [mat-dialog-close]="true">Obriši</button>
+</mat-dialog-actions>
+
+U src/app/komponente/dijalog-potvrda/dijalog-potvrda.component.ts unesite:
+
+import { Component } from '@angular/core';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+
+@Component({
+  selector: 'app-dijalog-potvrda',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule],
+  templateUrl: './dijalog-potvrda.component.html'
+})
+export class DijalogPotvrdaComponent {}
+
+Korak 9: Dijalog forma za dodavanje i izmenu podatkaOvaj modal će se koristiti i za dodavanje (POST) i 
+za izmenu (PUT).Otvorite src/app/komponente/forma-podatak/forma-podatak.component.html:
+
+<h2 mat-dialog-title>{{ data ? 'Izmena podatka' : 'Dodavanje podatka' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="forma" class="forma-kontejner">
+    <mat-form-field appearance="fill">
+      <mat-label>Naziv</mat-label>
+      <input matInput formControlName="naziv">
+    </mat-form-field>
+    
+    <mat-form-field appearance="fill">
+      <mat-label>Kategorija</mat-label>
+      <input matInput formControlName="kategorija">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="zatvori()">Odustani</button>
+  <button mat-raised-button color="primary" [disabled]="forma.invalid" (click)="sacuvaj()">Sačuvaj</button>
+</mat-dialog-actions>
+
+Zatim unesite logiku u src/app/komponente/forma-podatak/forma-podatak.component.ts
+
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { Podatak } from '../../modeli/podatak.model';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-forma-podatak',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, ReactiveFormsModule],
+  templateUrl: './forma-podatak.component.html',
+  styleUrls: ['./forma-podatak.component.css']
+})
+export class FormaPodatakComponent implements OnInit {
+  forma!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<FormbaPodatakComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: Podatak
+  ) {}
+
+  ngOnInit(): OnInit {
+    this.forma = this.fb.group({
+      naziv: [this.data ? this.data.naziv : '', Validators.required],
+      kategorija: [this.data ? this.data.kategorija : '', Validators.required]
+    });
+  }
+
+  sacuvaj() {
+    if (this.forma.valid) {
+      this.dialogRef.close(this.forma.value);
+    }
+  }
+
+  zatvori() {
+    this.dialogRef.close();
+  }
+}
+
+U src/app/komponente/forma-podatak/forma-podatak.component.css dodajte:
+
+css.forma-kontejner {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 300px;
+  padding-top: 10px;
+}
+Korak 10: Tabela za prikaz podataka sa efektom prelaza miša (Hover effect)Ovo je ključna komponenta koja objedinjuje dohvatanje podataka, pipe pretragu, 
+izgled tabele i operacije izmena i brisanja.Otvorite src/app/komponente/prikaz-podataka/prikaz-podataka.component.html:
+
+<div class="akcije-red">
+  <mat-form-field appearance="outline" class="pretraga">
+    <mat-label>Filtriraj podatke (Naziv ili Kategorija)</mat-label>
+    <input matInput [(ngModel)]="tekstPretrage" placeholder="Unesite pojam za pretragu...">
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="otvoriFormu()">
+    <mat-icon>add</mat-icon> Dodaj novi podatak
+  </button>
+</div>
+
+<table class="custom-tabela">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Naziv podatak</th>
+      <th>Kategorija</th>
+      <th style="text-align: center;">Akcije</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Primenjujemo napravljeni prilagođeni pipe za filtriranje -->
+    <tr *ngFor="let podatak of listaPodataka | filtriranje: tekstPretrage" class="tabela-red">
+      <td>{{ podatak.id }}</td>
+      <td>{{ podatak.naziv }}</td>
+      <td>{{ podatak.kategorija }}</td>
+      <td style="text-align: center;">
+        <button mat-icon-button color="accent" (click)="otvoriFormu(podatak)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="potvrdiBrisanje(podatak)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </tr>
+    <tr *ngIf="(listaPodataka | filtriranje: tekstPretrage)?.length === 0">
+      <td colspan="4" style="text-align: center; padding: 20px;">Nema pronađenih podataka.</td>
+    </tr>
+  </tbody>
+</table>
+
+Dodajte CSS pravila u src/app/komponente/prikaz-podataka/prikaz-podataka.component.css da biste dobili traženi sivi efekat prelaska miša:
+
+.akcije-red {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.pretraga {
+  width: 40%;
+}
+.custom-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: white;
+}
+.custom-tabela th, .custom-tabela td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+.custom-tabela th {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* ZA BODOVE: Isticanje reda sivom bojom pozadine prilikom prelaska miša (hover efekat) */
+.tabela-red:hover {
+  background-color: #e0e0e0 !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+Na kraju, povežite sve u src/app/komponente/prikaz-podataka/prikaz-podataka.component.ts:
+
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+
+import { SifarnikService } from '../../servisi/sifarnik.service';
+import { Podatak } from '../../modeli/podatak.model';
+import { FiltriranjePipe } from '../../pipe/filtriranje.pipe';
+import { DijalogPotvrdaComponent } from '../dijalog-potvrda/dijalog-potvrda.component';
+import { FormaPodatakComponent } from '../forma-podatak/forma-podatak.component';
+
+@Component({
+  selector: 'app-prikaz-podataka',
+  standalone: true,
+  imports: [
+    CommonModule, FormsModule, MatDialogModule, MatButtonModule, 
+    MatFormFieldModule, MatInputModule, MatIconModule, FiltriranjePipe
+  ],
+  templateUrl: './prikaz-podataka.component.html',
+  styleUrls: ['./prikaz-podataka.component.css']
+})
+export class PrikazPodatakaComponent implements OnInit {
+  listaPodataka: Podatak[] = [];
+  tekstPretrage: string = '';
+
+  constructor(private service: SifarnikService, private dialog: MatDialog) {}
+
+  ngOnInit(): void {
+    this.ucitajSvePodatke();
+  }
+
+  // GET poziv
+  ucitajSvePodatke() {
+    this.service.getPodaci().subscribe({
+      next: (data) => this.listaPodataka = data,
+      error: (err) => console.error('Greška pri učitavanju podataka', err)
+    });
+  }
+
+  // POST i PUT poziv kroz istu modalnu formu
+  otvoriFormu(podatak?: Podatak) {
+    const dialogRef = this.dialog.open(FormaPodatakComponent, {
+      width: '400px',
+      data: podatak ? { ...podatak } : null
+    });
+
+    dialogRef.afterClosed().subscribe(rezultat => {
+      if (rezultat) {
+        if (podatak && podatak.id) {
+          // Izmena postojećeg podatka (PUT)
+          this.service.izmeniPodatak(podatak.id, rezultat).subscribe(() => this.ucitajSvePodatke());
+        } else {
+          // Dodavanje novog podatka (POST)
+          this.service.dodajPodatak(rezultat).subscribe(() => this.ucitajSvePodatke());
+        }
+      }
+    });
+  }
+
+  // DELETE poziv sa modalnom potvrdom
+  potvrdiBrisanje(podatak: Podatak) {
+    const dialogRef = this.dialog.open(DijalogPotvrdaComponent);
+
+    dialogRef.afterClosed().subscribe(potvrdjeno => {
+      if (potvrdjeno && podatak.id) {
+        this.service.obrisiPodatak(podatak.id).subscribe(() => {
+          this.ucitajSvePodatke(); // Osveži tabelu nakon brisanja
+        });
+      }
+    });
+  }
+}
