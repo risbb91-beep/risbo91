@@ -1,0 +1,107 @@
+    public abstract class Osoba
+    {
+        public string Ime { get; set; }
+        public string Prezime { get; set; }
+        public int GodinaRodjenja { get; set; }
+
+    }
+
+    public class Reditelj:Osoba
+    {
+
+    }
+
+    public class Glumac:Osoba
+    {
+        public Glumac(string ime, string prezime, int godinarodjenja)
+        {
+            Ime = ime;
+            Prezime = prezime;
+            GodinaRodjenja = godinarodjenja;
+        }
+    }
+
+
+    public class Film
+    {
+        public string Naziv { get; set; }
+        public int Ocena { get; set; }
+        public int GodinaSnimanja { get; set; }
+
+        public enum Zanrovi
+        {
+            komedija,drama,triler,horor
+        }
+        public Zanrovi Zanr { get; set; }
+
+        public Reditelj Reditelji { get; set; }
+
+        public List<Glumac> Glumci {  get; set; }
+
+        public Film()
+        {
+            Glumci = new List<Glumac>();
+        }
+
+        public void MetodaPromenaZanra(Zanrovi zanr)
+        {
+            Zanr = zanr;
+        }
+
+    }
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Reditelj red=new Reditelj();
+            red.Ime = "Ana";
+            red.Prezime = "Peric";
+            red.GodinaRodjenja = 1970;
+
+            Film fil1 = new Film();
+            fil1.Naziv = "Zivot u gradu";
+            fil1.GodinaSnimanja = 2005;
+            fil1.Ocena = 9;
+            fil1.Zanr = Film.Zanrovi.komedija;
+            fil1.Reditelji = red;
+            fil1.Glumci.Add(new Glumac("Jovan", "Prokic", 1980));
+            fil1.Glumci.Add(new Glumac("Nina", "Jaksic", 1985));
+
+            Film fil2 = new Film();
+            fil2.Naziv = "Beograd";
+            fil2.GodinaSnimanja = 2008;
+            fil2.Ocena = 10;
+            fil2.Zanr = Film.Zanrovi.drama;
+            fil2.Reditelji = red;
+            fil2.Glumci.Add(new Glumac("Stefan", "Petrovic", 1982));
+            fil2.Glumci.Add(new Glumac("Jovana", "Mitic", 1984));
+
+            Film fil3 = new Film();
+            fil3.Naziv = "Negde daleko";
+            fil3.GodinaSnimanja = 2010;
+            fil3.Ocena = 7;
+            fil3.Zanr = Film.Zanrovi.triler;
+            fil3.Reditelji = red;
+            fil3.Glumci.Add(new Glumac("Nikola", "Jovanovic", 1987));
+            fil3.Glumci.Add(new Glumac("Aleksandra", "Dejanovic", 1988));
+
+            List<Film> listafilm = new List<Film>();
+            listafilm.Add(fil1);
+            listafilm.Add(fil2);
+            listafilm.Add(fil3);
+
+            List<Film> listafilmsort = listafilm.OrderByDescending(f => f.Ocena).ToList();
+
+            foreach (var f in listafilmsort)
+            {
+                Console.WriteLine(f.Naziv);
+            }
+
+            fil1.MetodaPromenaZanra(Film.Zanrovi.triler);
+            fil2.MetodaPromenaZanra(Film.Zanrovi.komedija);
+            fil3.MetodaPromenaZanra(Film.Zanrovi.drama);
+
+            Console.ReadKey();
+        }
+    }
