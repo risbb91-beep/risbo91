@@ -1,0 +1,111 @@
+Korak 1: Napravi novi projekatOtvori Visual Studio na svom računaru.Klikni na opciju "Create a new project" (Kreiraj novi projekat).
+U polju za pretragu na vrhu ukucaj Console.Izaberi Console App (pazi da piše C# u uglu ikonice).
+Klikni Next.U polju Project name ukucaj ime (npr. ZivotinjeProjekat).Klikni Next, pa onda Create.
+Korak 2: Pripremi fajl za kodKada se projekat otvori, na ekranu ćeš videti fajl koji se zove Program.cs.
+Obriši sve što se trenutno nalazi u tom fajlu (označi sve sa Ctrl + A i pritisni Delete).
+Sada imaš potpuno prazan prostor za kucanje.Korak 3: Ukucaj "delove" koda (Struktura)Kod se kuca od vrha ka dole.
+Najbolje je da ga unosiš ovim redosledom kako bi razumeo strukturu:1. 
+Uvoz biblioteka (Na samom vrhu)Na prvu liniju koda moramo dodati biblioteke koje omogućavaju rad sa listama i sortiranjem. Ukucaj:
+2. Glavni prostor (Namespace)Ispod toga otvaraš prostor u kom će se nalaziti sve tvoje klase. Ukucaj:
+3. Dodavanje klasa (Unutar namespace-a)Sada unutar tih velikih zagvrada { } od namespace-a ubaci klasu po klasu.Prvo ukucaj baznu klasu:
+Odmah ispod nje (i dalje unutar istih spoljnih zagrada), ukucaj klase naslednice:
+4. Dodavanje Main metode (Gde se program pokreće)Na samom kraju, ispod klase Ptica, 
+dodaj klasu Program koja sadrži Main metodu u kojoj praviš životinje i ispisuješ ih na ekran:
+
+
+
+
+
+
+
+
+
+
+
+public abstract class Zivotinja
+    {
+        public string Naziv { get; set; }
+        public string Boja { get; set; }
+        public decimal Tezina { get; set; }
+
+        public virtual void MetodaZvuk()
+        {
+            Console.WriteLine("Nepoznat zvuk");
+        }
+
+        public void MetodaPromenaTezine(decimal tezina)
+        {
+            Tezina = tezina;
+        }
+    }
+
+    public class Pas:Zivotinja
+    {
+        public enum Rase
+        {
+            buldog,hrt,ovcar
+        }
+        public Rase Rasa { get; set; }
+
+        public override void MetodaZvuk()
+        {
+            Console.WriteLine("Av-av");
+        }
+    }
+
+    public class Ptica:Zivotinja
+    {
+        public bool Letenje { get; set; }
+
+        public override void MetodaZvuk()
+        {
+            Console.WriteLine("Piju-piju");
+        }
+    }
+
+
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Pas pas1 = new Pas();
+            pas1.Naziv = "Kiki";
+            pas1.Boja = "Crna";
+            pas1.Tezina = 10;
+            pas1.Rasa = Pas.Rase.ovcar;
+
+            Pas pas2=new Pas();
+            pas2.Naziv = "Maki";
+            pas2.Boja = "Zuta";
+            pas2.Tezina = 11;
+            pas2.Rasa = Pas.Rase.buldog;
+
+            Ptica pti=new Ptica();
+            pti.Naziv = "Laki";
+            pti.Boja = "Bela";
+            pti.Tezina = 1;
+            pti.Letenje = true;
+
+            List<Zivotinja> zivlista = new List<Zivotinja>();
+            zivlista.Add(pas1);
+            zivlista.Add(pas2);
+            zivlista.Add(pti);
+
+            List<Zivotinja> zivlistasort = zivlista.OrderBy(z => z.Tezina).ToList();
+
+            foreach (var z in zivlistasort)
+            {
+                Console.WriteLine(z.Naziv);
+            }
+
+            pas1.MetodaPromenaTezine(9);
+            pas2.MetodaPromenaTezine(12);
+            pti.MetodaPromenaTezine(2);
+
+            pas1.MetodaZvuk();
+            pas2.MetodaZvuk();
+            pti.MetodaZvuk();
+
+            Console.ReadKey();
+        }
+    }
